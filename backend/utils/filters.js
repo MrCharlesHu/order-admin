@@ -1,3 +1,4 @@
+const {isObjectEmpty, isArrayEmpty} = require('../utils/objects');
 /**
  * 查询过滤器
  * @param field
@@ -13,24 +14,74 @@ function Filter(field, comp, value) {
 function Filters() {
   this.filters = [];
 }
+/**
+ * @param field
+ * @param value
+ * @returns {Filters}
+ */
 Filters.prototype.eq = function (field, value) {
   this.filters.push(new Filter(field, '=', value));
   return this;
 };
+/**
+ * @param field
+ * @param value
+ * @returns {Filters}
+ */
 Filters.prototype.gt = function (field, value) {
   this.filters.push(new Filter(field, '>=', value));
   return this;
 };
+/**
+ * @param field
+ * @param value
+ * @returns {Filters}
+ */
 Filters.prototype.lt = function (field, value) {
   this.filters.push(new Filter(field, '<=', value));
   return this;
 };
+/**
+ * @param field
+ * @param value
+ * @returns {Filters}
+ */
 Filters.prototype.gte = function (field, value) {
   this.filters.push(new Filter(field, '>=', value));
   return this;
 };
+/**
+ * @param field
+ * @param value
+ * @returns {Filters}
+ */
 Filters.prototype.lte = function (field, value) {
   this.filters.push(new Filter(field, '<=', value));
+  return this;
+};
+/**
+ * @returns {Object}
+ */
+Filters.prototype.toObject = function () {
+  var obj = {};
+  for (let filter of this.filters) {
+    obj[filter.field] = filter.value;
+  }
+  return obj;
+};
+Filters.prototype.isEmpty = function () {
+  return this.filters.length > 0;
+};
+/**
+ * @param filters2
+ * @returns {Filters}
+ */
+Filters.prototype.concat = function (filters2) {
+  if (filters2 instanceof Filters && !filters2.isEmpty()) {
+    for (let filter of filters2) {
+      this.filters.push(filter);
+    }
+  }
   return this;
 };
 Filters.prototype[Symbol.iterator] = function () {
@@ -43,4 +94,8 @@ Filters.prototype[Symbol.iterator] = function () {
   };
 };
 
+/**
+ * 查询条件
+ * @type {Filters}
+ */
 exports.Filters = Filters;

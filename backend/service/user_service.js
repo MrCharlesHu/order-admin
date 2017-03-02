@@ -2,6 +2,7 @@ const TABLE_NAME = require('../const/table_ext').USER.name;
 var BaseService = require('./base_service');
 var PV = require('../utils/validation');
 var User = require('../bean/user');
+const Filters = require('../utils/filters').Filters;
 const MsgTip = require('../const/msg_tip');
 const {isArrayEmpty, isObjectEmpty} = require('../utils/objects');
 const ACTIVE = require('../const/active_type').ACTIVE;
@@ -53,8 +54,8 @@ class UserService extends BaseService {
   //   return yield* super.deleteEntities({product_id: productId});
   // }
 
-  getFilters(filter) {
-    return Object.assign({}, {deleted: ACTIVE}, filter);
+  getFilters(filters) {
+    return new Filters().eq('deleted', ACTIVE).concat(filters);
   }
 
   transformOne(entity) {

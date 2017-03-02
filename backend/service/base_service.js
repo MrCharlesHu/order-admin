@@ -1,12 +1,13 @@
 var knex = require('../connect/mysql').knex;
 var PV = require('../utils/validation');
-var {isObjectEmpty, isArrayEmpty, isString} = require('../utils/objects');
+var {isArrayEmpty, isString} = require('../utils/objects');
 var logger = require('../utils/logger').getLogger('base-service');
 const Page = require('../utils/pageable').Page;
+const Filters = require('../utils/filters').Filters;
 const FIELD_ID = 'eid';
 const DELETED = require('../const/active_type').DELETED;
 const fakeDeleteObj = {deleted: DELETED};
-const eidFilter = eid => Object.defineProperty({}, FIELD_ID, {enumerable: true, value: eid});
+const eidFilter = eid => new Filters().eq(FIELD_ID, eid);
 
 class BaseService {
 
@@ -19,34 +20,37 @@ class BaseService {
     });
   }
 
+  assembleFilters(statement, filters) {
+    if (filters instanceof Filters) {
+      for (let {field, comp, value} of filters) {
+        statement.where(field, comp, value);
+      }
+    }
+    return statement;
+  }
+
   *findAll(sort) {
     const _filter = this.getFilters();
-    let statement = this.getKnex().select().where(_filter);
+    let statement = this.getKnex().select().where(_filter.toObject());
     this.buildSort(statement, sort);
     var rows = yield statement;
     return this.returnList(rows);
   }
 
   *findPageByFilter(pn, ps, filters, sort) {
-    const _filter = this.getFilters();
+    var total = yield* this.getTotalCount(filters);
+    const _filters = this.getFilters(filters);
     let statement = this.getKnex().select();
-    statement.where(_filter);
-    if (!isObjectEmpty(filters)) {
-      for (let {field, comp, value} of filters) {
-        statement.where(field, comp, value);
-      }
-    }
-    statement.limit(ps).offset((pn - 1) * ps);
+    this.assembleFilters(statement, _filters).limit(ps).offset((pn - 1) * ps);
     this.buildSort(statement, sort);
     var rows = yield statement;
-    var total = yield this.getTotalCount(_filter);
     return new Page(total, this.returnList(rows), pn, ps);
   }
 
-  *getTotalCount() {
-    const _filter = this.getFilters();
-    let statement = this.getKnex().count('* as total').where(_filter);
-    var rows = yield statement;
+  *getTotalCount(filters) {
+    const _filter = this.getFilters(filters);
+    let statement = this.getKnex().count('* as total');
+    var rows = yield this.assembleFilters(statement, _filter);
     return !isArrayEmpty(rows) && rows[0].total || 0;
   }
 
@@ -58,7 +62,8 @@ class BaseService {
     var pv_err = PV().obj('findListByFilter-filter', filter).validate();
     if (pv_err) throw pv_err;
     const _filter = this.getFilters(filter);
-    let statement = this.getKnex().select().where(_filter);
+    let statement = this.getKnex().select();
+    statement = this.assembleFilters(statement, _filter);
     this.buildSort(statement, sort);
     var rows = yield statement;
     return this.returnList(rows);
@@ -68,7 +73,7 @@ class BaseService {
     var pv_err = PV().num('findOneById-eid', eid).validate();
     if (pv_err) throw pv_err;
     const _filter = this.getFilters(eidFilter(eid));
-    var statement = this.getKnex().select().where(_filter);
+    var statement = this.getKnex().select().where(_filter.toObject());
     var rows = yield statement;
     return !isArrayEmpty(rows) && this.transformOne(rows[0]) || {};
   }
@@ -89,7 +94,7 @@ class BaseService {
     var pv_err = PV().str('findListByWhereIn-prop', prop).arr('findListByWhereIn-values', values).validate();
     if (pv_err) throw pv_err;
     const _filter = this.getFilters();
-    let statement = this.getKnex().select().where(_filter).whereIn(prop, values);
+    let statement = this.getKnex().select().where(_filter.toObject()).whereIn(prop, values);
     this.buildSort(statement, sort);
     var rows = yield statement;
     return this.returnList(rows);
@@ -121,10 +126,12 @@ class BaseService {
     return !isArrayEmpty(rows) && rows[0];
   }
 
-  *updateEntities(filter, updateObj) {
-    var pv_err = PV().obj('updateEntities-filter', filter).obj('updateEntities-updateObj', updateObj).validate();
+  *updateEntities(filters, updateObj) {
+    var pv_err = PV().obj('updateEntities-filter', filters).obj('updateEntities-updateObj', updateObj).validate();
     if (pv_err) throw pv_err;
-    return yield this.getKnex().where(filter).update(updateObj);
+    var statement = this.getKnex();
+    statement = this.assembleFilters(statement, filters);
+    return yield statement.update(updateObj);
   }
 
   *updateEntitiesByWhereIn(prop, values, updateObj) {
@@ -188,9 +195,9 @@ class BaseService {
     }
   }
 
-  getFilters(filter) {
+  getFilters(filters) {
     logger.debug('Invoke method getFilters of baseService');
-    return filter || {};
+    return filters instanceof Filters ? filters : new Filters();
   }
 
   /**

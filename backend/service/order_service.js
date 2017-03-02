@@ -11,6 +11,18 @@ class OrderService extends BaseService {
     return yield* super.findPageByFilter(pn, ps, filters);
   }
 
+  *deleteOne(orderId) {
+    var pv_err = PV().num('OrderId', orderId).validate();
+    if (pv_err) throw pv_err;
+    return yield* super.deleteEntityById(orderId);
+  }
+
+  *deleteBatch(orderIds) {
+    var pv_err = PV().arr('OrderIds', orderIds).validate();
+    if (pv_err) throw pv_err;
+    return yield* super.deleteEntitiesByIds(orderIds);
+  }
+
   transformOne(entity) {
     return entity && new Order().parseEntity(entity);
   }

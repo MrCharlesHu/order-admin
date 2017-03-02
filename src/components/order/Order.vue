@@ -1,5 +1,5 @@
 <template>
-    <section>
+    <section key="order">
         <!--工具条-->
         <el-col :span="24" class="toolbar">
             <el-form :inline="true" :model="filters">
@@ -20,10 +20,10 @@
             </el-form>
         </el-col>
         <!--列表-->
-        <el-table :data="page.items" stripe highlight-current-row v-loading="loading" @selection-change="selectedChange"
+        <el-table :data="page.items" highlight-current-row v-loading="loading" @selection-change="selectedChange"
                   default-expand-all style="width: 100%;">
             <el-table-column type="selection" width="35"></el-table-column>
-            <!--<el-table-column type="index" width="40"></el-table-column>-->
+            <el-table-column type="index" width="40"></el-table-column>
             <el-table-column prop="orderNo" label="单号" min-width="120"></el-table-column>
             <el-table-column prop="customer" label="客户名" width="80"></el-table-column>
             <el-table-column prop="phone" label="手机号" min-width="130"></el-table-column>
@@ -33,8 +33,8 @@
                 <!--:filters="[{ text: 'iOS', value: 'iOS' }, { text: 'Android', value: 'Android' }]"-->
                 <!--:filter-method="filterTag"-->
                 <template scope="scope">
-                    <el-tag :type="scope.row.mobileOS === 'iOS' ? 'primary' : 'success'"
-                            close-transition>{{scope.row.mobileOS}}
+                    <el-tag :type="scope.row.mobileOS === 'iOS' ? 'primary' : 'success'" close-transition>
+                        {{scope.row.mobileOS}}
                     </el-tag>
                 </template>
             </el-table-column>
@@ -46,7 +46,7 @@
             <el-table-column label="操作" width="140">
                 <template scope="scope">
                     <el-button size="small" @click="handleEdit(scope.$index, scope.row)">查看</el-button>
-                    <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+                    <el-button type="danger" size="small" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                 </template>
             </el-table-column>
             <el-table-column type="expand">
@@ -118,7 +118,7 @@
   import Constants from 'assets/js/constants'
   import DateUtils from 'assets/js/date_utils'
   import NProgress from 'nprogress'
-  import {getOrderPage, removeUser, batchRemoveUser, editUser, addUser} from 'api/api';
+  import {getOrderPage,getOrderTrash, deleteOrder, deleteOrders} from 'api/api';
 
   export default {
     data() {
@@ -151,10 +151,7 @@
           }]
         },
         filters: {
-          range: [
-            Date.now() - 3600 * 1000 * 24 * 90,
-            Date.now()
-          ],
+          range: [],
           name: ''
         },
         page: {
@@ -165,6 +162,7 @@
         },
         loading: false,
         selected: [],//列表选中列
+        orderSwitch: '',
 
         //编辑界面是否显示
         editFormVisible: false,
@@ -204,7 +202,8 @@
           to: DateUtils.formatDate(rangeArr[1]),
           name: this.filters.name
         };
-        getOrderPage(params).then((res) => {
+        let promise = this.orderSwitch == 'trash' ? getOrderTrash(params) : getOrderPage(params);
+        promise.then((res) => {
           this.page.total = res.data.data.total;
           this.page.items = res.data.data.items;
           this.loading = false;
@@ -221,81 +220,61 @@
         this.addFormVisible = true;
         this.addForm = {name: '', sex: -1, age: 0, birth: '', addr: ''};
       },
-      //编辑
-      editSubmit: function () {
-        this.$refs.editForm.validate((valid) => {
-          if (valid) {
-            this.$confirm('确认提交吗？', '提示', {}).then(() => {
-              this.editLoading = true;
-              NProgress.start();
-              let para = Object.assign({}, this.editForm);
-              para.birth = (!para.birth || para.birth == '') ? '' : DateUtils.formatDate(new Date(para.birth), 'yyyy-MM-dd');
-              editUser(para).then((res) => {
-                this.editLoading = false;
-                NProgress.done();
-                this.$notify({
-                  title: '成功',
-                  message: '提交成功',
-                  type: 'success'
-                });
-                this.$refs['editForm'].resetFields();
-                this.editFormVisible = false;
-                this.getPageList();
-              });
-            });
-          }
-        });
-      },
       selectedChange: function (selected) {
         this.selected = selected;
       },
       //删除
-      handleDel: function (index, row) {
+      handleDelete: function (index, row) {
         this.$confirm('确认删除该记录吗?', '提示', {
           type: 'warning'
         }).then(() => {
+          debugger;
           this.loading = true;
           NProgress.start();
-          let para = {id: row.id};
-          removeUser(para).then((res) => {
+          deleteOrder(row.eid).then((res) => {
             this.loading = false;
             NProgress.done();
-            this.$notify({
-              title: '成功',
-              message: '删除成功',
-              type: 'success'
-            });
+            this.$notify({title: '成功', message: '删除成功', type: 'success'});
             this.getPageList();
           });
         }).catch(() => {
-
         });
       },
       //批量删除
       batchRemove: function () {
-        var ids = this.selected.map(item => item.id).toString();
+        var orderIds = this.selected.map(item => item.eid).toString();
         this.$confirm('确认删除选中记录吗？', '提示', {
           type: 'warning'
         }).then(() => {
           this.loading = true;
           NProgress.start();
-          let para = {ids: ids};
-          batchRemoveUser(para).then((res) => {
+          deleteOrders(orderIds).then((res) => {
             this.loading = false;
             NProgress.done();
-            this.$notify({
-              title: '成功',
-              message: '删除成功',
-              type: 'success'
-            });
+            this.$notify({title: '成功', message: '删除成功', type: 'success'});
             this.getPageList();
           });
         }).catch(() => {
-
         });
       }
     },
     mounted() {
+      this.orderSwitch = location.hash.split('/').pop();
+      debugger;
+      switch (this.orderSwitch) {
+        case 'today' :
+          this.filters.range = [Date.now(), Date.now()];
+          break;
+        case 'yesterday':
+          this.filters.range = [Date.now() - 3600 * 1000 * 24, Date.now()];
+          break;
+        case 'all':
+          this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
+          break;
+        case 'trash':
+          this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
+          break;
+      }
       this.getPageList();
     }
   }
