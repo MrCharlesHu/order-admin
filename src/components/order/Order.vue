@@ -1,0 +1,296 @@
+<template>
+    <section>
+        <!--工具条-->
+        <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+            <el-form :inline="true" :model="filters">
+                <el-form-item label="时间范围">
+                    <el-date-picker v-model="filters.range" type="daterange" align="right" placeholder="时间范围"
+                                    :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="渠道">
+                    <el-input v-model="filters.name" placeholder="渠道"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" v-on:click="getPageList">查询</el-button>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="exportExcel">导出</el-button>
+                </el-form-item>
+            </el-form>
+        </el-col>
+        <!--列表-->
+        <el-table :data="page.items" highlight-current-row v-loading="loading" @selection-change="selectedChange"
+                  default-expand-all style="width: 100%;">
+            <el-table-column type="selection" width="35"></el-table-column>
+            <!--<el-table-column type="index" width="40"></el-table-column>-->
+            <el-table-column prop="orderNo" label="单号" min-width="120"></el-table-column>
+            <el-table-column prop="customer" label="客户名" width="80"></el-table-column>
+            <el-table-column prop="phone" label="手机号" min-width="130"></el-table-column>
+            <!--<el-table-column prop="product" label="订购产品" width="120"></el-table-column>-->
+            <el-table-column prop="address" label="收货地址" min-width="150"></el-table-column>
+            <el-table-column prop="mobileOS" label="系统" width="80"></el-table-column>
+            <!--<el-table-column prop="originUrl" label="来源" min-width="120"></el-table-column>-->
+            <el-table-column prop="ctime" label="提交时间" min-width="170" :formatter="formatDateTime"
+                             sortable></el-table-column>
+            <el-table-column prop="remarks" label="留言" min-width="170"></el-table-column>
+            <el-table-column prop="ip" label="IP" min-width="140"></el-table-column>
+            <el-table-column label="操作" width="140">
+                <template scope="scope">
+                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">查看</el-button>
+                    <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column type="expand" style="background-color: blue">
+                <template scope="props">
+                    <p>来源: {{ props.row.originUrl }}</p>
+                    <p>订购产品: {{ props.row.product }}</p>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!--工具条-->
+        <el-col :span="24" class="toolbar">
+            <el-button type="danger" @click="batchRemove" :disabled="this.selected.length===0">批量删除</el-button>
+            <el-pagination layout="total, prev, pager, next" @current-change="handleCurrentChange" :page-size="page.ps"
+                           :total="page.total" style="float:right;">
+            </el-pagination>
+        </el-col>
+        <!--编辑界面-->
+        <el-dialog title="订单明细" v-model="editFormVisible" :close-on-click-modal="false">
+            <el-form :model="editForm" label-width="80px" ref="editForm">
+                <el-form-item label="单号" prop="orderNo">
+                    <el-input v-model="editForm.orderNo" disabledd="true"></el-input>
+                </el-form-item>
+                <el-form-item label="客户名" prop="customer">
+                    <el-input v-model="editForm.customer" disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="手机号" prop="phone">
+                    <el-input v-model="editForm.phone" disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="订购产品" prop="phone">
+                    <el-input v-model="editForm.address" disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="收货地址" prop="address">
+                    <el-input v-model="editForm.address" disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="系统" prop="mobileOS">
+                    <el-input v-model="editForm.mobileOS" disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="来源" prop="originUrl">
+                    <el-input v-model="editForm.originUrl" disabled="true"></el-input>
+                </el-form-item>
+                <!--<el-form-item label="性别">-->
+                <!--<el-radio-group v-model="editForm.sex">-->
+                <!--<el-radio class="radio" :label="1">男</el-radio>-->
+                <!--<el-radio class="radio" :label="0">女</el-radio>-->
+                <!--</el-radio-group>-->
+                <!--</el-form-item>-->
+                <el-form-item label="提交时间">
+                    <el-date-picker type="datetime" placeholder="选择日期" v-model="editForm.ctime"
+                                    disabled="true"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="留言" prop="remarks">
+                    <el-input v-model="editForm.remarks" disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="IP" prop="ip">
+                    <el-input v-model="editForm.ip" disabled="true"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click.native="editFormVisible = false">取消</el-button>
+                <!--<el-button type="primary" @click.native="editSubmit" :loading="editLoading">提交</el-button>-->
+            </div>
+        </el-dialog>
+    </section>
+</template>
+
+<script>
+  import Constants from 'common/constants'
+  import DateUtils from 'common/date_utils'
+  import NProgress from 'nprogress'
+  import {getOrderPage, removeUser, batchRemoveUser, editUser, addUser} from 'api/api';
+
+  export default {
+    data() {
+      return {
+        pickerOptions: {
+          shortcuts: [{
+            text: '上周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '上个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+        },
+        filters: {
+          range: [
+            Date.now() - 3600 * 1000 * 24 * 90,
+            Date.now()
+          ],
+          name: ''
+        },
+        page: {
+          total: 0,
+          items: [],
+          pn: 1,
+          ps: Constants.DefaultPageSize
+        },
+        loading: false,
+        selected: [],//列表选中列
+
+        //编辑界面是否显示
+        editFormVisible: false,
+        editLoading: false,
+        //editFormRules: {name: [{ required: true, message: '请输入姓名', trigger: 'blur' }]},
+        //编辑界面数据
+        editForm: {id: 0, name: '', sex: -1, age: 0, birth: '', addr: ''},
+
+        //新增界面是否显示
+        //addFormVisible: false,
+        //addLoading: false,
+        //addFormRules: {name: [{ required: true, message: '请输入姓名', trigger: 'blur' }]},
+        //新增界面数据
+        //addForm: {name: '',sex: -1,age: 0,birth: '',addr: ''}
+      }
+    },
+    methods: {
+      formatDateTime: function (row, column) {
+        return DateUtils.formatDate(row.ctime) + '\r\n\t' + DateUtils.formatTime(row.ctime);
+      },
+      handleCurrentChange(val) {
+        this.page.pn = val;
+        this.getPageList();
+      },
+      //获取用户列表
+      getPageList() {
+        this.loading = true;
+        NProgress.start();
+        let rangeArr = this.filters.range;
+        let params = {
+          pn: this.page.pn,
+          ps: this.page.ps,
+          from: DateUtils.formatDate(rangeArr[0]),
+          to: DateUtils.formatDate(rangeArr[1]),
+          name: this.filters.name
+        };
+        getOrderPage(params).then((res) => {
+          this.page.total = res.data.data.total;
+          this.page.items = res.data.data.items;
+          this.loading = false;
+          NProgress.done();
+        });
+      },
+      //显示编辑界面
+      handleEdit: function (index, row) {
+        this.editFormVisible = true;
+        this.editForm = Object.assign({}, row);
+      },
+      //显示新增界面
+      exportExcel: function () {
+        this.addFormVisible = true;
+        this.addForm = {name: '', sex: -1, age: 0, birth: '', addr: ''};
+      },
+      //编辑
+      editSubmit: function () {
+        this.$refs.editForm.validate((valid) => {
+          if (valid) {
+            this.$confirm('确认提交吗？', '提示', {}).then(() => {
+              this.editLoading = true;
+              NProgress.start();
+              let para = Object.assign({}, this.editForm);
+              para.birth = (!para.birth || para.birth == '') ? '' : DateUtils.formatDate(new Date(para.birth), 'yyyy-MM-dd');
+              editUser(para).then((res) => {
+                this.editLoading = false;
+                NProgress.done();
+                this.$notify({
+                  title: '成功',
+                  message: '提交成功',
+                  type: 'success'
+                });
+                this.$refs['editForm'].resetFields();
+                this.editFormVisible = false;
+                this.getPageList();
+              });
+            });
+          }
+        });
+      },
+      selectedChange: function (selected) {
+        this.selected = selected;
+      },
+      //删除
+      handleDel: function (index, row) {
+        this.$confirm('确认删除该记录吗?', '提示', {
+          type: 'warning'
+        }).then(() => {
+          this.loading = true;
+          NProgress.start();
+          let para = {id: row.id};
+          removeUser(para).then((res) => {
+            this.loading = false;
+            NProgress.done();
+            this.$notify({
+              title: '成功',
+              message: '删除成功',
+              type: 'success'
+            });
+            this.getPageList();
+          });
+        }).catch(() => {
+
+        });
+      },
+      //批量删除
+      batchRemove: function () {
+        var ids = this.selected.map(item => item.id).toString();
+        this.$confirm('确认删除选中记录吗？', '提示', {
+          type: 'warning'
+        }).then(() => {
+          this.loading = true;
+          NProgress.start();
+          let para = {ids: ids};
+          batchRemoveUser(para).then((res) => {
+            this.loading = false;
+            NProgress.done();
+            this.$notify({
+              title: '成功',
+              message: '删除成功',
+              type: 'success'
+            });
+            this.getPageList();
+          });
+        }).catch(() => {
+
+        });
+      }
+    },
+    mounted() {
+      this.getPageList();
+    }
+  }
+</script>
+
+<style lang="scss" scoped rel="stylesheet/scss" type="text/css">
+    #expand-column-style {
+        padding: 0px;
+        background-color: red;
+    }
+</style>
