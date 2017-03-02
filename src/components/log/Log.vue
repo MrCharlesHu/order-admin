@@ -31,8 +31,8 @@
     </section>
 </template>
 <script>
-  import Constants from 'common/constants'
-  import DateUtils from 'common/date_utils'
+  import Constants from 'assets/js/constants'
+  import DateUtils from 'assets/js/date_utils'
   import NProgress from 'nprogress'
   import {getLogPage} from 'api/api';
 

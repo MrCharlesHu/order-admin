@@ -2,7 +2,7 @@
     <el-row class="container">
         <el-col :span="24" class="header">
             <el-col :span="20" class="logo">
-                <img src="../assets/logo4.png"/> <span>订单<i class="txt">管理后台</i></span>
+                <img src="../assets/img/logo.png"/> <span>订单<i class="txt">管理后台</i></span>
             </el-col>
             <el-col :span="4" class="userinfo">
                 <el-dropdown trigger="click">

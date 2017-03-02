@@ -1,7 +1,7 @@
 <template>
     <section>
         <!--工具条-->
-        <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+        <el-col :span="24" class="toolbar">
             <el-form :inline="true" :model="filters">
                 <el-form-item label="时间范围">
                     <el-date-picker v-model="filters.range" type="daterange" align="right" placeholder="时间范围"
@@ -20,7 +20,7 @@
             </el-form>
         </el-col>
         <!--列表-->
-        <el-table :data="page.items" highlight-current-row v-loading="loading" @selection-change="selectedChange"
+        <el-table :data="page.items" stripe highlight-current-row v-loading="loading" @selection-change="selectedChange"
                   default-expand-all style="width: 100%;">
             <el-table-column type="selection" width="35"></el-table-column>
             <!--<el-table-column type="index" width="40"></el-table-column>-->
@@ -28,12 +28,20 @@
             <el-table-column prop="customer" label="客户名" width="80"></el-table-column>
             <el-table-column prop="phone" label="手机号" min-width="130"></el-table-column>
             <!--<el-table-column prop="product" label="订购产品" width="120"></el-table-column>-->
-            <el-table-column prop="address" label="收货地址" min-width="150"></el-table-column>
-            <el-table-column prop="mobileOS" label="系统" width="80"></el-table-column>
+            <el-table-column prop="address" label="收货地址" min-width="180"></el-table-column>
+            <el-table-column prop="mobileOS" label="系统" width="80">
+                <!--:filters="[{ text: 'iOS', value: 'iOS' }, { text: 'Android', value: 'Android' }]"-->
+                <!--:filter-method="filterTag"-->
+                <template scope="scope">
+                    <el-tag :type="scope.row.mobileOS === 'iOS' ? 'primary' : 'success'"
+                            close-transition>{{scope.row.mobileOS}}
+                    </el-tag>
+                </template>
+            </el-table-column>
             <!--<el-table-column prop="originUrl" label="来源" min-width="120"></el-table-column>-->
-            <el-table-column prop="ctime" label="提交时间" min-width="170" :formatter="formatDateTime"
+            <el-table-column prop="ctime" label="提交时间" width="120" :formatter="formatDateTime"
                              sortable></el-table-column>
-            <el-table-column prop="remarks" label="留言" min-width="170"></el-table-column>
+            <el-table-column prop="remarks" label="留言" min-width="180"></el-table-column>
             <el-table-column prop="ip" label="IP" min-width="140"></el-table-column>
             <el-table-column label="操作" width="140">
                 <template scope="scope">
@@ -41,10 +49,12 @@
                     <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
                 </template>
             </el-table-column>
-            <el-table-column type="expand" style="background-color: blue">
+            <el-table-column type="expand">
                 <template scope="props">
-                    <p>来源: {{ props.row.originUrl }}</p>
-                    <p>订购产品: {{ props.row.product }}</p>
+                    <div class="order-expand-column">
+                        <p>来源: {{ props.row.originUrl }}</p>
+                        <p>订购产品: {{ props.row.product }}</p>
+                    </div>
                 </template>
             </el-table-column>
         </el-table>
@@ -59,25 +69,25 @@
         <el-dialog title="订单明细" v-model="editFormVisible" :close-on-click-modal="false">
             <el-form :model="editForm" label-width="80px" ref="editForm">
                 <el-form-item label="单号" prop="orderNo">
-                    <el-input v-model="editForm.orderNo" disabledd="true"></el-input>
+                    <el-input v-model="editForm.orderNo" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="客户名" prop="customer">
-                    <el-input v-model="editForm.customer" disabled="true"></el-input>
+                    <el-input v-model="editForm.customer" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="手机号" prop="phone">
-                    <el-input v-model="editForm.phone" disabled="true"></el-input>
+                    <el-input v-model="editForm.phone" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="订购产品" prop="phone">
-                    <el-input v-model="editForm.address" disabled="true"></el-input>
+                    <el-input v-model="editForm.address" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="收货地址" prop="address">
-                    <el-input v-model="editForm.address" disabled="true"></el-input>
+                    <el-input v-model="editForm.address" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="系统" prop="mobileOS">
-                    <el-input v-model="editForm.mobileOS" disabled="true"></el-input>
+                    <el-input v-model="editForm.mobileOS" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="来源" prop="originUrl">
-                    <el-input v-model="editForm.originUrl" disabled="true"></el-input>
+                    <el-input v-model="editForm.originUrl" disabled></el-input>
                 </el-form-item>
                 <!--<el-form-item label="性别">-->
                 <!--<el-radio-group v-model="editForm.sex">-->
@@ -87,13 +97,13 @@
                 <!--</el-form-item>-->
                 <el-form-item label="提交时间">
                     <el-date-picker type="datetime" placeholder="选择日期" v-model="editForm.ctime"
-                                    disabled="true"></el-date-picker>
+                                    disabled></el-date-picker>
                 </el-form-item>
                 <el-form-item label="留言" prop="remarks">
-                    <el-input v-model="editForm.remarks" disabled="true"></el-input>
+                    <el-input v-model="editForm.remarks" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="IP" prop="ip">
-                    <el-input v-model="editForm.ip" disabled="true"></el-input>
+                    <el-input v-model="editForm.ip" disabled></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -105,8 +115,8 @@
 </template>
 
 <script>
-  import Constants from 'common/constants'
-  import DateUtils from 'common/date_utils'
+  import Constants from 'assets/js/constants'
+  import DateUtils from 'assets/js/date_utils'
   import NProgress from 'nprogress'
   import {getOrderPage, removeUser, batchRemoveUser, editUser, addUser} from 'api/api';
 
@@ -173,11 +183,14 @@
     },
     methods: {
       formatDateTime: function (row, column) {
-        return DateUtils.formatDate(row.ctime) + '\r\n\t' + DateUtils.formatTime(row.ctime);
+        return DateUtils.formatDateTime(row.ctime);
       },
       handleCurrentChange(val) {
         this.page.pn = val;
         this.getPageList();
+      },
+      filterTag(value, row) {
+        return row.mobileOS === value;
       },
       //获取用户列表
       getPageList() {
@@ -289,8 +302,16 @@
 </script>
 
 <style lang="scss" scoped rel="stylesheet/scss" type="text/css">
-    #expand-column-style {
-        padding: 0px;
-        background-color: red;
+    .order-expand-column {
+        p {
+            line-height: 20px;
+            margin: 0;
+            &:first-child:first-letter {
+                letter-spacing: 28px;
+            }
+        }
+        box-shadow: 0 0 8px 0px #d0f5d0 inset;
+        margin: 0 -19px 0 -50px;
+        padding: 10px 20px;
     }
 </style>

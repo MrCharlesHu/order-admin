@@ -34,9 +34,10 @@
     </section>
 </template>
 <script>
-  import Constants from 'common/constants'
+  import Constants from 'assets/js/constants'
   import {getUserList} from 'api/api';
   import NProgress from 'nprogress'
+  
   export default {
     data() {
       return {
