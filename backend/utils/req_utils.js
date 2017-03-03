@@ -5,10 +5,10 @@ module.exports = {
    */
   ip: function (req) {
     let ip = /\d+\.\d+\.\d+\.\d/g.exec(req.ip);
-    if (ip.length > 0) {
+    if (ip && ip.length > 0) {
       ip = ip[0];
     } else {
-      ip = ApiConn.host;
+      ip = (req.header('host') && req.header('host').split(':').shift());
     }
     return ip;
   },

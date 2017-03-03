@@ -11,8 +11,13 @@ function Filter(field, comp, value) {
   this.comp = comp;
   this.value = value;
 }
-function Filters() {
+function Filters(obj) {
   this.filters = [];
+  if (!isObjectEmpty(obj)) {
+    for (let prop in obj) {
+      this.eq(prop, obj[prop]);
+    }
+  }
 }
 /**
  * @param field
@@ -70,7 +75,7 @@ Filters.prototype.toObject = function () {
   return obj;
 };
 Filters.prototype.isEmpty = function () {
-  return this.filters.length > 0;
+  return this.filters.length == 0;
 };
 /**
  * @param filters2

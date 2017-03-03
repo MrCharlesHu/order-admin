@@ -19,7 +19,9 @@
 
 <script>
   import {userLogin} from 'api/api'
+  import Storage from 'assets/js/storage'
   import UUID from 'uuid'
+  import MD5 from 'md5'
   import NProgress from 'nprogress'
 
   export default {
@@ -53,24 +55,18 @@
             //_this.$router.replace('/table');
             this.loggingIn = true;
             NProgress.start();
-            let uniqueId = localStorage.getItem("lik");//login unique key
-            if (!uniqueId) {
-              uniqueId = UUID.v1().split('-').join('');
-              localStorage.setItem('lik', uniqueId);
-            }
             var loginParams = {
-              uniqueId: uniqueId,
+              uniqueId: Storage.getUniqueId(),
               username: this.loginForm.username,
-              password: this.loginForm.password
+              password: MD5(this.loginForm.password)
             };
-            userLogin(loginParams).then((res) => {
-              this.logining = false;
+            userLogin(loginParams).then(({err, data, msg}) => {
+              this.loggingIn = false;
               NProgress.done();
-              let {msg, err, data} = res;
               if (err) {
                 this.$notify({title: '错误', message: msg, type: 'error'});
               } else {
-                sessionStorage.setItem('user', JSON.stringify(data));
+                Storage.saveLoginInfo(data);
                 this.$router.push({path: '/order/today'});
               }
             });

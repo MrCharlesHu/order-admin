@@ -1,4 +1,5 @@
-export default {
+export const UNIQUE_ID = 'lik';
 
-  DefaultPageSize: 10
-}
+export const USER_LOGIN_KEY = 'uli';
+
+export const DEFAULT_PAGE_SIZE = 10;

@@ -1,43 +1,47 @@
 import axios from "axios";
 
-let API_PREFIX = '/api';
+const base = '/api';
 
 export const userLogin = params => {
-  return axios.post(`${API_PREFIX}/user/login`, params).then(res => res.data);
+  return axios.post(`${base}/user/login`, params).then(res => res.data);
 };
 
-export const getUserList = params => {
-  return axios.get(`${API_PREFIX}/user/page`, {params: params});
+export const getUserPage = params => {
+  return axios.get(`${base}/user/page`, {params: params}).then(res => res.data);
 };
 
-export const batchRemoveUser = params => {
-  return axios.get(`${API_PREFIX}/user/batchremove`, {params: params});
+export const deleteUser = (userId) => {
+  return axios.get(`${base}/user/delone/${userId}`).then(res => res.data);
+};
+
+export const deleteUsers = (userIds) => {
+  return axios.get(`${base}/user/delbat/${userIds}`).then(res => res.data);
 };
 
 export const editUser = params => {
-  return axios.get(`${API_PREFIX}/user/edit`, {params: params});
+  return axios.get(`${base}/user/edit`, {params: params}).then(res => res.data);
 };
 
 export const addUser = params => {
-  return axios.get(`${API_PREFIX}/user/add`, {params: params});
+  return axios.get(`${base}/user/add`, {params: params}).then(res => res.data);
 };
 
 export const getOrderPage = params => {
-  return axios.get(`${API_PREFIX}/order/page`, {params: params});
+  return axios.get(`${base}/order/page`, {params: params}).then(res => res.data);
 };
 
 export const getOrderTrash = params => {
-  return axios.get(`${API_PREFIX}/order/trash`, {params: params});
+  return axios.get(`${base}/order/trash`, {params: params}).then(res => res.data);
 };
 
 export const deleteOrder = (eid) => {
-  return axios.get(`${API_PREFIX}/order/delone/${eid}`);
+  return axios.get(`${base}/order/delone/${eid}`).then(res => res.data);
 };
 
 export const deleteOrders = (eids) => {
-  return axios.get(`${API_PREFIX}/order/delbat/${eids}`);
+  return axios.get(`${base}/order/delbat/${eids}`).then(res => res.data);
 };
 
 export const getLogPage = () => {
-  return axios.get(`${API_PREFIX}/log/page`);
+  return axios.get(`${base}/log/page`).then(res => res.data);
 };

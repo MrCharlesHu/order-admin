@@ -7,6 +7,7 @@ var userService = require('../service/user_service');
 var logService = require('../service/log_service');
 var RedisUtils = require('../connect/redis');
 var {ip, userAgent} = require('../utils/req_utils');
+const splitToParseInt = require('../utils/objects').splitToParseInt;
 const MsgTip = require('../const/msg_tip');
 const PageRequest = require('../utils/pageable').PageRequest;
 const isUserInfoValid = userInfo => userInfo && userInfo.eid;
@@ -28,6 +29,7 @@ router.post("/login", function (req, res) {
   const password = req.body.password;
   var cop = co(function*() {
     var userInfo = yield* userService.login(username, password);
+    delete userInfo.password;
     if (isUserInfoValid(userInfo)) {
       yield* logService.saveLoginLog(userInfo.eid, userInfo.username, '登录', ip(req), userAgent(req));
       yield* RedisUtils.cacheUserLoginInfo(uniqueId, userInfo);
@@ -90,23 +92,30 @@ router.get("/page", function (req, res) {
   });
   Ctx(res, cop).coSuccess();
 });
-//
-// router.post("/password", function (req, res) {
-//   var userId = parseInt(req.body.userId);
-//   var newPassword = req.body.newPassword;
-//   var cop = co(function*() {
-//     var returnObj = yield* userService.modifyPassword(userId, newPassword);
-//     return returnObj;
-//   });
-//   Ctx(res, cop).coSuccess();
-// });
-//
-// router.get("/delete/:userId", function (req, res) {
-//   var userId = req.query.userId;
-//   var cop = co(function*() {
-//     return yield* userService.delete(userId);
-//   });
-//   Ctx(res, cop).coSuccess();
-// });
+
+router.post("/password", function (req, res) {
+  var userId = parseInt(req.body.userId);
+  var newPassword = req.body.newPassword;
+  var cop = co(function*() {
+    return yield* userService.modifyPassword(userId, newPassword);
+  });
+  Ctx(res, cop).coSuccess();
+});
+
+router.get("/delone/:userId", function (req, res) {
+  var userId = req.params.userId;
+  var cop = co(function*() {
+    return yield* userService.deleteOne(userId && parseInt(userId));
+  });
+  Ctx(res, cop).coSuccess();
+});
+
+router.get("/delbat/:userIds", function (req, res) {
+  var userIds = req.params.userIds;
+  var cop = co(function*() {
+    return yield* userService.deleteBatch(splitToParseInt(userIds, ','));
+  });
+  Ctx(res, cop).coSuccess();
+});
 
 module.exports = router;

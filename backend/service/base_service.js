@@ -58,10 +58,10 @@ class BaseService {
    * 根据过滤条件查询
    * @returns {*}
    */
-  *findListByFilter(filter, sort) {
-    var pv_err = PV().obj('findListByFilter-filter', filter).validate();
+  *findListByFilter(filters, sort) {
+    var pv_err = PV().obj('findListByFilter-filters', filters).validate();
     if (pv_err) throw pv_err;
-    const _filter = this.getFilters(filter);
+    const _filter = this.getFilters(filters);
     let statement = this.getKnex().select();
     statement = this.assembleFilters(statement, _filter);
     this.buildSort(statement, sort);
@@ -127,7 +127,7 @@ class BaseService {
   }
 
   *updateEntities(filters, updateObj) {
-    var pv_err = PV().obj('updateEntities-filter', filters).obj('updateEntities-updateObj', updateObj).validate();
+    var pv_err = PV().obj('updateEntities-filters', filters).obj('updateEntities-updateObj', updateObj).validate();
     if (pv_err) throw pv_err;
     var statement = this.getKnex();
     statement = this.assembleFilters(statement, filters);
@@ -161,10 +161,10 @@ class BaseService {
     return yield* this.updateEntities(eidFilter(eid), fakeDeleteObj);
   }
 
-  *deleteEntities(filter) {
-    var pv_err = PV().obj('deleteEntities-filter', filter).validate();
+  *deleteEntities(filters) {
+    var pv_err = PV().obj('deleteEntities-filters', filters).validate();
     if (pv_err) throw pv_err;
-    return yield* this.updateEntities(filter, fakeDeleteObj);
+    return yield* this.updateEntities(filters, fakeDeleteObj);
   }
 
   *deleteEntitiesByWhereIn(prop, values) {

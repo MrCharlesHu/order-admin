@@ -2,12 +2,13 @@
     <el-row class="container">
         <el-col :span="24" class="header">
             <el-col :span="20" class="logo">
-                <img src="../assets/img/logo.png"/> <span>订单<i class="txt">管理后台</i></span>
+                <img src="../assets/img/logo.png"/>
+                <span>订单<i class="txt">管理后台</i></span>
             </el-col>
             <el-col :span="4" class="userinfo">
                 <el-dropdown trigger="click">
-                    <span class="el-dropdown-link userinfo-inner"><img
-                            :src="this.sysUserAvatar"/> {{sysUserName}}</span>
+                    <span class="el-dropdown-link userinfo-inner">
+                        <img :src="this.userAvatar"/> {{username}}</span>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item>我的消息</el-dropdown-item>
                         <el-dropdown-item>设置</el-dropdown-item>
@@ -19,8 +20,7 @@
         <el-col :span="24" class="main">
             <aside>
                 <el-menu :default-active="$route.path" class="el-menu-vertical-demo" @open="handleopen"
-                         @close="handleclose" @select="handleselect"
-                         theme="dark" unique-opened router>
+                         @close="handleclose" @select="handleselect" theme="dark" unique-opened router>
                     <template v-for="(item,index) in $router.options.routes" v-if="!item.hidden">
                         <el-submenu :index="index+''" v-if="!item.leaf">
                             <template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
@@ -56,11 +56,13 @@
 </template>
 
 <script>
+  import Storage from "assets/js/storage";
+
   export default {
     data() {
       return {
-        sysUserName: '',
-        sysUserAvatar: '',
+        username: '',
+        userAvatar: '',
         form: {
           name: '',
           region: '',
@@ -91,20 +93,17 @@
         this.$confirm('确认退出吗?', '提示', {
           //type: 'warning'
         }).then(() => {
-          sessionStorage.removeItem('user');
+          Storage.clearLoginInfo();
           _this.$router.push('/login');
         }).catch(() => {
-
         });
-
       }
     },
     mounted() {
-      var user = sessionStorage.getItem('user');
+      var user = Storage.getLoginInfo();
       if (user) {
-        user = JSON.parse(user);
-        this.sysUserName = user.username || '';
-        this.sysUserAvatar = user.avatar || '';
+        this.username = user.username || '';
+        this.userAvatar = user.avatar || '';
       }
     }
   }

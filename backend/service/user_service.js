@@ -18,7 +18,7 @@ class UserService extends BaseService {
   *login(username, password) {
     var pv_err = PV().str('用户名', username).str('密码', password).validate();
     if (pv_err) throw pv_err;
-    var rows = yield* super.findListByFilter({username: username, password: password});
+    var rows = yield* super.findListByFilter(new Filters({username: username, password: password}));
     if (isArrayEmpty(rows) || isObjectEmpty(rows[0])) {
       throw new Error(MsgTip.LOGIN_INFO_WRONG);
     }
@@ -31,31 +31,26 @@ class UserService extends BaseService {
     return yield* super.findPageByFilter(pn, ps);
   }
 
-  // /**
-  //  * 商品更新时更新标签
-  //  * @param {number} productId
-  //  * @param {number} commodityId
-  //  * @returns {*}
-  //  */
-  // *updateOne(productId, commodityId) {
-  //   var pv_err = PV().num('商品标签ID', commodityId).num('商品ID', productId).validate();
-  //   if (pv_err) throw pv_err;
-  //   return yield* super.updateEntities({'product_id': productId}, {'commodity_id': commodityId});
-  // }
+  *modifyPassword(userId, newPassword) {
+    var pv_err = PV().num('UserId', userId).str('新密码', newPassword).validate();
+    if (pv_err) throw pv_err;
+    return yield* super.updateEntityById(userId, {password: newPassword});
+  }
 
-  // /**
-  //  * 商品下架的时候删除记录
-  //  * @param {number} productId
-  //  * @returns {*}
-  //  */
-  // *deleteOneWhenProductIsTakenDown(productId) {
-  //   var pv_err = PV().num('商品ID', productId).validate();
-  //   if (pv_err) throw pv_err;
-  //   return yield* super.deleteEntities({product_id: productId});
-  // }
+  *deleteOne(userId) {
+    var pv_err = PV().num('UserId', userId).validate();
+    if (pv_err) throw pv_err;
+    return yield* super.deleteEntityById(userId);
+  }
+
+  *deleteBatch(userIds) {
+    var pv_err = PV().arr('UserIds', userIds).validate();
+    if (pv_err) throw pv_err;
+    return yield* super.deleteEntitiesByIds(userIds);
+  }
 
   getFilters(filters) {
-    return new Filters().eq('deleted', ACTIVE).concat(filters);
+    return new Filters({deleted: ACTIVE}).concat(filters);
   }
 
   transformOne(entity) {

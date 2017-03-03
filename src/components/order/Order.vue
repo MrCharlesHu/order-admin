@@ -46,7 +46,7 @@
             <el-table-column label="操作" width="140">
                 <template scope="scope">
                     <el-button size="small" @click="handleEdit(scope.$index, scope.row)">查看</el-button>
-                    <el-button type="danger" size="small" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                    <el-button type="danger" size="small" @click="doDelete(scope.$index, scope.row)">删除</el-button>
                 </template>
             </el-table-column>
             <el-table-column type="expand">
@@ -60,7 +60,7 @@
         </el-table>
         <!--工具条-->
         <el-col :span="24" class="toolbar">
-            <el-button type="danger" @click="batchRemove" :disabled="this.selected.length===0">批量删除</el-button>
+            <el-button type="danger" @click="doBatchDelete" :disabled="this.selected.length===0">批量删除</el-button>
             <el-pagination layout="total, prev, pager, next" @current-change="handleCurrentChange" :page-size="page.ps"
                            :total="page.total" style="float:right;">
             </el-pagination>
@@ -115,10 +115,10 @@
 </template>
 
 <script>
-  import Constants from 'assets/js/constants'
   import DateUtils from 'assets/js/date_utils'
   import NProgress from 'nprogress'
-  import {getOrderPage,getOrderTrash, deleteOrder, deleteOrders} from 'api/api';
+  import {DEFAULT_PAGE_SIZE} from 'assets/js/constants'
+  import {getOrderPage, getOrderTrash, deleteOrder, deleteOrders} from 'api/api';
 
   export default {
     data() {
@@ -158,7 +158,7 @@
           total: 0,
           items: [],
           pn: 1,
-          ps: Constants.DefaultPageSize
+          ps: DEFAULT_PAGE_SIZE
         },
         loading: false,
         selected: [],//列表选中列
@@ -203,9 +203,9 @@
           name: this.filters.name
         };
         let promise = this.orderSwitch == 'trash' ? getOrderTrash(params) : getOrderPage(params);
-        promise.then((res) => {
-          this.page.total = res.data.data.total;
-          this.page.items = res.data.data.items;
+        promise.then(({err, data, msg}) => {
+          this.page.total = data.total;
+          this.page.items = data.items;
           this.loading = false;
           NProgress.done();
         });
@@ -224,14 +224,13 @@
         this.selected = selected;
       },
       //删除
-      handleDelete: function (index, row) {
+      doDelete: function (index, row) {
         this.$confirm('确认删除该记录吗?', '提示', {
           type: 'warning'
         }).then(() => {
-          debugger;
           this.loading = true;
           NProgress.start();
-          deleteOrder(row.eid).then((res) => {
+          deleteOrder(row.eid).then(({err, data, msg}) => {
             this.loading = false;
             NProgress.done();
             this.$notify({title: '成功', message: '删除成功', type: 'success'});
@@ -241,14 +240,14 @@
         });
       },
       //批量删除
-      batchRemove: function () {
+      doBatchDelete: function () {
         var orderIds = this.selected.map(item => item.eid).toString();
         this.$confirm('确认删除选中记录吗？', '提示', {
           type: 'warning'
         }).then(() => {
           this.loading = true;
           NProgress.start();
-          deleteOrders(orderIds).then((res) => {
+          deleteOrders(orderIds).then(({err, data, msg}) => {
             this.loading = false;
             NProgress.done();
             this.$notify({title: '成功', message: '删除成功', type: 'success'});
@@ -260,7 +259,6 @@
     },
     mounted() {
       this.orderSwitch = location.hash.split('/').pop();
-      debugger;
       switch (this.orderSwitch) {
         case 'today' :
           this.filters.range = [Date.now(), Date.now()];

@@ -3,7 +3,7 @@ import NotFound from "components/404.vue";
 import Home from "components/Home.vue";
 import Main from "components/Main.vue";
 import Order from "components/order/Order";
-import UserList from "components/user/UserList.vue";
+import User from "components/user/User.vue";
 import Log from "components/log/Log.vue";
 
 let routes = [{
@@ -35,7 +35,7 @@ let routes = [{
   iconCls: 'fa fa-id-card-o',
   children: [
     // {path: '/user/add', component: UserAdd, name: '添加管理员'},
-    {path: '/user/list', component: UserList, name: '管理员列表'}
+    {path: '/user/list', component: User, name: '管理员列表'}
   ]
 }, {
   path: '/',

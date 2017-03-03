@@ -31,7 +31,7 @@
     </section>
 </template>
 <script>
-  import Constants from 'assets/js/constants'
+  import {DEFAULT_PAGE_SIZE} from 'assets/js/constants'
   import DateUtils from 'assets/js/date_utils'
   import NProgress from 'nprogress'
   import {getLogPage} from 'api/api';
@@ -46,7 +46,7 @@
           total: 0,
           items: [],
           pn: 1,
-          ps: Constants.DefaultPageSize
+          ps: DEFAULT_PAGE_SIZE
         },
         loading: false
       }
@@ -68,9 +68,9 @@
         };
         this.loading = true;
         NProgress.start();
-        getLogPage(params).then((res) => {
-          this.page.total = res.data.data.total;
-          this.page.items = res.data.data.items;
+        getLogPage(params).then(({err,data,msg}) => {
+          this.page.total = data.total;
+          this.page.items = data.items;
           this.loading = false;
           NProgress.done();
         });
