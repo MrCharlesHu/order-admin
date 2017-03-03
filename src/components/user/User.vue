@@ -4,7 +4,7 @@
         <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
             <el-form :inline="true" :model="filters">
                 <el-form-item>
-                    <el-input v-model="filters.username" placeholder="姓名"></el-input>
+                    <el-input v-model="filters.username" placeholder="管理员"/>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" v-on:click="getPageList">查询</el-button>
@@ -16,12 +16,12 @@
         </el-col>
         <!--列表-->
         <el-table :data="page.items" highlight-current-row v-loading="loading" style="width: 100%;">
-            <el-table-column prop="eid" label="ID" width="150"></el-table-column>
-            <el-table-column prop="username" label="管理员" width="150"></el-table-column>
-            <el-table-column prop="level" label="级别" width="150"></el-table-column>
-            <el-table-column prop="type" label="类型" width="150"></el-table-column>
-            <el-table-column prop="remarks" label="备注" min-width="150"></el-table-column>
-            <el-table-column label="操作" width="150">
+            <el-table-column prop="eid" label="ID" min-width="120"></el-table-column>
+            <el-table-column prop="username" label="管理员" min-width="120"></el-table-column>
+            <el-table-column prop="level" label="级别" min-width="120"></el-table-column>
+            <el-table-column prop="type" label="类型" min-width="120"></el-table-column>
+            <el-table-column prop="remarks" label="备注" min-width="120"></el-table-column>
+            <el-table-column label="操作" min-width="150">
                 <template scope="scope">
                     <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
                     <el-button type="danger" size="small" @click="doDelete(scope.$index, scope.row)">删除</el-button>
@@ -29,65 +29,40 @@
             </el-table-column>
         </el-table>
         <!--工具条-->
-        <el-col :span="24" class="toolbar">
+        <el-col :span="24" class="toolbar table-footer">
             <el-pagination layout="total, prev, pager, next" @current-change="handleCurrentChange" :page-size="page.ps"
                            :total="page.total" style="float:right;">
             </el-pagination>
         </el-col>
-
-        <!--编辑界面-->
-        <el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
-            <el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
-                <el-form-item label="姓名" prop="username">
-                    <el-input v-model="editForm.username" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="性别">
-                    <el-radio-group v-model="editForm.sex">
-                        <el-radio class="radio" :label="1">男</el-radio>
-                        <el-radio class="radio" :label="0">女</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="年龄">
-                    <el-input-number v-model="editForm.age" :min="0" :max="200"></el-input-number>
-                </el-form-item>
-                <el-form-item label="生日">
-                    <el-date-picker type="date" placeholder="选择日期" v-model="editForm.birth"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="地址">
-                    <el-input type="textarea" v-model="editForm.addr"></el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click.native="editFormVisible = false">取消</el-button>
-                <el-button type="primary" @click.native="editSubmit" :loading="editLoading">提交</el-button>
-            </div>
-        </el-dialog>
-
         <!--新增界面-->
         <el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
-            <el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-                <el-form-item label="姓名" prop="username">
-                    <el-input v-model="addForm.username" auto-complete="off"></el-input>
+            <el-form :model="addFormData" label-width="120px" :rules="addFormRules" ref="addFormData">
+                <el-form-item label="用户名称" prop="addUsername">
+                    <el-input type="text" v-model="addFormData.addUsername" auto-complete="off" placeholder="用户名称"/>
                 </el-form-item>
-                <el-form-item label="性别">
-                    <el-radio-group v-model="addForm.sex">
-                        <el-radio class="radio" :label="1">男</el-radio>
-                        <el-radio class="radio" :label="0">女</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="年龄">
-                    <el-input-number v-model="addForm.age" :min="0" :max="200"></el-input-number>
-                </el-form-item>
-                <el-form-item label="生日">
-                    <el-date-picker type="date" placeholder="选择日期" v-model="addForm.birth"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="地址">
-                    <el-input type="textarea" v-model="addForm.addr"></el-input>
+                <el-form-item label="用户密码" prop="password">
+                    <el-input type="password" v-model="addFormData.addPassword" auto-complete="off" placeholder="用户密码"/>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click.native="addFormVisible = false">取消</el-button>
                 <el-button type="primary" @click.native="addSubmit" :loading="addLoading">提交</el-button>
+            </div>
+        </el-dialog>
+        <!--编辑界面-->
+        <el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
+            <el-form :model="editFormData" label-width="120px" :rules="editFormRules" ref="editFormData">
+                <el-form-item label="用户名称" prop="editUsername">
+                    <el-input type="text" v-model="editFormData.editUsername" auto-complete="off" placeholder="用户名称"/>
+                </el-form-item>
+                <el-form-item label="用户密码" prop="editPassword">
+                    <el-input type="password" v-model="editFormData.editPassword" auto-complete="off"
+                              placeholder="用户密码"/>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click.native="editFormVisible = false">取消</el-button>
+                <el-button type="primary" @click.native="editSubmit" :loading="editLoading">提交</el-button>
             </div>
         </el-dialog>
     </section>
@@ -96,6 +71,7 @@
 <script>
   import {DEFAULT_PAGE_SIZE} from 'assets/js/constants'
   import NProgress from 'nprogress'
+  import MD5 from 'md5'
   import {getUserPage, deleteUser, deleteUsers, addUser, editUser} from 'api/api'
 
   export default {
@@ -116,25 +92,31 @@
         addFormVisible: false,//新增界面是否显示
         addLoading: false,
         addFormRules: {
-          username: [
-            {required: true, message: '请输入姓名', trigger: 'blur'}
+          addUsername: [
+            {required: true, message: '请输入用户名称', trigger: 'blur'}
+          ],
+          addPassword: [
+            {required: true, message: '请输入用户密码', trigger: 'blur'}
           ]
         },
         //新增界面数据
-        addForm: {
-          username: '',
-          password: ''
+        addFormData: {
+          addUsername: '',
+          addPassword: ''
         },
 
         editFormVisible: false,//编辑界面是否显示
         editLoading: false,
         editFormRules: {
-          username: [
-            {required: true, message: '请输入姓名', trigger: 'blur'}
+          editUsername: [
+            {required: true, message: '请输入用户名称', trigger: 'blur'}
+          ],
+          editPassword: [
+            {required: true, message: '请输入用户密码', trigger: 'blur'}
           ]
         },
         //编辑界面数据
-        editForm: {
+        editFormData: {
           eid: 0,
           username: '',
           password: ''
@@ -155,65 +137,68 @@
         };
         this.loading = true;
         NProgress.start();
-        getUserPage(params).then(({err,data,msg}) => {
+        getUserPage(params).then(({err, data, msg}) => {
           this.page.total = data.total;
           this.page.items = data.items;
           this.loading = false;
           NProgress.done();
         });
       },
-      //显示编辑界面
-      handleEdit: function (index, row) {
-        this.editFormVisible = true;
-        this.editForm = Object.assign({}, row);
-      },
       //显示新增界面
       handleAdd: function () {
         this.addFormVisible = true;
-        this.addForm = {
-          username: '',
-          sex: -1,
-          age: 0,
-          birth: '',
-          addr: ''
-        };
+        this.addFormData.addUsername = '';
+        this.addFormData.addPassword = '';
       },
-      //编辑
-      editSubmit: function () {
-        this.$refs.editForm.validate((valid) => {
+      //新增
+      addSubmit: function () {
+        this.$refs.addFormData.validate((valid) => {
           if (valid) {
             this.$confirm('确认提交吗？', '提示', {}).then(() => {
-              this.editLoading = true;
+              this.addLoading = true;
               NProgress.start();
-              let params = Object.assign({}, this.editForm);
-              params.birth = (!params.birth || params.birth == '') ? '' : util.formatDate.format(new Date(params.birth), 'yyyy-MM-dd');
-              editUser(params).then(({err,data,msg}) => {
-                this.editLoading = false;
+              var params = {
+                username: this.addFormData.addUsername,
+                password: MD5(this.addFormData.addPassword)
+              };
+              addUser(params).then(({err, data, msg}) => {
+                this.addLoading = false;
                 NProgress.done();
                 this.$notify({title: '成功', message: '删除成功', type: 'success'});
-                this.$refs['editForm'].resetFields();
-                this.editFormVisible = false;
+                this.$refs['addFormData'].resetFields();
+                this.addFormVisible = false;
                 this.getPageList();
               });
             });
           }
         });
       },
-      //新增
-      addSubmit: function () {
-        this.$refs.addForm.validate((valid) => {
+      //显示编辑界面
+      handleEdit: function (index, row) {
+        this.editFormVisible = true;
+        this.editFormData.eid = row.eid;
+        this.editFormData.editUsername = row.username;
+        this.editFormData.editPassword = '';
+      },
+      //编辑
+      editSubmit: function () {
+        this.$refs.editFormData.validate((valid) => {
           if (valid) {
             this.$confirm('确认提交吗？', '提示', {}).then(() => {
-              this.addLoading = true;
+              this.editLoading = true;
               NProgress.start();
-              let params = Object.assign({}, this.addForm);
-              params.birth = (!params.birth || params.birth == '') ? '' : util.formatDate.format(new Date(params.birth), 'yyyy-MM-dd');
-              addUser(params).then(({err,data,msg}) => {
-                this.addLoading = false;
+              var params = {
+                eid: this.editFormData.eid,
+                username: this.editFormData.editUsername,
+                password: MD5(this.editFormData.editPassword)
+              };
+              console.log(params);
+              editUser(params).then(({err, data, msg}) => {
+                this.editLoading = false;
                 NProgress.done();
-                this.$notify({title: '成功', message: '删除成功', type: 'success'});
-                this.$refs['addForm'].resetFields();
-                this.addFormVisible = false;
+                this.$notify({title: '成功', message: '修改成功', type: 'success'});
+                this.$refs['editFormData'].resetFields();
+                this.editFormVisible = false;
                 this.getPageList();
               });
             });
@@ -230,7 +215,7 @@
         }).then(() => {
           this.loading = true;
           NProgress.start();
-          deleteUser(row.eid).then(({err,data,msg}) => {
+          deleteUser(row.eid).then(({err, data, msg}) => {
             this.loading = false;
             NProgress.done();
             this.$notify({title: '成功', message: '删除成功', type: 'success'});
@@ -247,7 +232,7 @@
         }).then(() => {
           this.loading = true;
           NProgress.start();
-          deleteUsers(userIds).then(({err,data,msg}) => {
+          deleteUsers(userIds).then(({err, data, msg}) => {
             this.loading = false;
             NProgress.done();
             this.$notify({title: '成功', message: '删除成功', type: 'success'});

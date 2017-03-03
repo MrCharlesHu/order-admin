@@ -9,14 +9,14 @@ const TableInfo = {
    */
   USER: {
     name: 'user',
-    fields: COMMON_PROPS.concat(['username', 'password', 'level', 'type', 'remarks'])
+    fields: COMMON_PROPS.concat(['username', 'password', 'avatar', 'level', 'type', 'remarks'])
   },
   /**
    * 订单
    */
   ORDER: {
     name: 'order',
-    fields: COMMON_PROPS.concat(['order_no', 'customer', 'phone', 'product', 'address', 'mobile_os', 'origin_url', 'ip', 'remarks'])
+    fields: COMMON_PROPS.concat(['customer', 'phone', 'product', 'address', 'mobile_os', 'origin_url', 'ip', 'remarks'])
   },
   /**
    * 管理员操作日志

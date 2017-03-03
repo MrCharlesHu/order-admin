@@ -23,7 +23,7 @@
             <el-table-column prop="ctime" label="登录时间" width="200" :formatter="formatDateTime"></el-table-column>
         </el-table>
         <!--工具条-->
-        <el-col :span="24" class="toolbar">
+        <el-col :span="24" class="toolbar table-footer">
             <el-pagination layout="total, prev, pager, next" @current-change="handleCurrentChange" :page-size="page.ps"
                            :total="page.total" style="float:right;">
             </el-pagination>
@@ -68,7 +68,7 @@
         };
         this.loading = true;
         NProgress.start();
-        getLogPage(params).then(({err,data,msg}) => {
+        getLogPage(params).then(({err, data, msg}) => {
           this.page.total = data.total;
           this.page.items = data.items;
           this.loading = false;

@@ -10,6 +10,8 @@ module.exports = {
 
   USER_NOT_LOGIN: '您没有登录',
 
+  USER_NOT_EXIST: '用户不存在',
+
   PASSWORD_WRONG: '两次密码输入不一致',
 
   LOGIN_INFO_WRONG: '用户名或密码错误',

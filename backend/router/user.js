@@ -6,7 +6,7 @@ var Ctx = require('../contexts').CoCtx;
 var userService = require('../service/user_service');
 var logService = require('../service/log_service');
 var RedisUtils = require('../connect/redis');
-var {ip, userAgent} = require('../utils/req_utils');
+const {ip, userAgent} = require('../utils/req_utils');
 const splitToParseInt = require('../utils/objects').splitToParseInt;
 const MsgTip = require('../const/msg_tip');
 const PageRequest = require('../utils/pageable').PageRequest;
@@ -87,17 +87,19 @@ router.get('/cache/info', function (req, res) {
 
 router.get("/page", function (req, res) {
   var pr = PageRequest.buildFromRequest(req);
+  var username = req.query.username;
   var cop = co(function*() {
-    return yield* userService.findPageList(pr.pn, pr.ps);
+    return yield* userService.findPageList(pr.pn, pr.ps, username);
   });
   Ctx(res, cop).coSuccess();
 });
 
-router.post("/password", function (req, res) {
-  var userId = parseInt(req.body.userId);
-  var newPassword = req.body.newPassword;
+router.post("/edit", function (req, res) {
+  var userId = parseInt(req.body.eid);
+  var username = req.body.username;
+  var password = req.body.password;
   var cop = co(function*() {
-    return yield* userService.modifyPassword(userId, newPassword);
+    return yield* userService.updateOne(userId, username, password);
   });
   Ctx(res, cop).coSuccess();
 });

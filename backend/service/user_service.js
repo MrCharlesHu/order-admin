@@ -25,16 +25,22 @@ class UserService extends BaseService {
     return rows[0];
   }
 
-  *findPageList(pn, ps) {
+  *findPageList(pn, ps, username) {
     var pv_err = PV().num('PageNumber', pn).num('PageSize', ps).validate();
     if (pv_err) throw pv_err;
-    return yield* super.findPageByFilter(pn, ps);
+    var filters = username ? new Filters({username: username}) : null;
+    return yield* super.findPageByFilter(pn, ps, filters);
   }
 
-  *modifyPassword(userId, newPassword) {
-    var pv_err = PV().num('UserId', userId).str('新密码', newPassword).validate();
+  *updateOne(userId, username, password) {
+    var pv_err = PV().num('UserId', userId).str('Username', username).str('Password', password).validate();
     if (pv_err) throw pv_err;
-    return yield* super.updateEntityById(userId, {password: newPassword});
+    var userInfo = yield* super.findOneById(userId);
+    if (!userInfo) {
+      throw new Error(MsgTip.USER_NOT_EXIST);
+    } else {
+      return yield* super.updateEntityById(userId, {username: username, password: password});
+    }
   }
 
   *deleteOne(userId) {

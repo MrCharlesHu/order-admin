@@ -6,6 +6,10 @@ class User extends CommonBean {
     super();
     this.username = username;
     this.password = password;
+    this.avatar = null;
+    this.level = null;
+    this.type = null;
+    this.remarks = null;
   }
 }
 

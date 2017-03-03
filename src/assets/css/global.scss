@@ -28,6 +28,9 @@ body {
 
 .toolbar {
   background: #fff;
+  &.table-footer {
+    padding: 5px;
+  }
 }
 
 .el-form--inline .el-form-item {
@@ -36,6 +39,9 @@ body {
 
 .el-table .cell {
   word-break: normal;
+  line-height: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .el-table__expanded-cell {

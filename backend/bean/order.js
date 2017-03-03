@@ -5,7 +5,6 @@ class Order extends CommonBean {
   constructor(_BODY) {
     super();
     _BODY = _BODY || {};
-    this.orderNo = _BODY.orderNo;
     this.customer = _BODY.customer;
     this.phone = _BODY.phone;
     this.product = _BODY.product;

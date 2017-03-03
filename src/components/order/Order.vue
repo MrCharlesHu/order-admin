@@ -9,7 +9,7 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="渠道">
-                    <el-input v-model="filters.name" placeholder="渠道"></el-input>
+                    <el-input v-model="filters.name" placeholder="渠道"/>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" v-on:click="getPageList">查询</el-button>
@@ -23,12 +23,12 @@
         <el-table :data="page.items" highlight-current-row v-loading="loading" @selection-change="selectedChange"
                   default-expand-all style="width: 100%;">
             <el-table-column type="selection" width="35"></el-table-column>
-            <el-table-column type="index" width="40"></el-table-column>
-            <el-table-column prop="orderNo" label="单号" min-width="120"></el-table-column>
-            <el-table-column prop="customer" label="客户名" width="80"></el-table-column>
-            <el-table-column prop="phone" label="手机号" min-width="130"></el-table-column>
-            <!--<el-table-column prop="product" label="订购产品" width="120"></el-table-column>-->
-            <el-table-column prop="address" label="收货地址" min-width="180"></el-table-column>
+            <!--<el-table-column type="index" width="30"></el-table-column>-->
+            <el-table-column prop="eid" label="单号" min-width="50"></el-table-column>
+            <el-table-column prop="customer" label="客户名" width="70"></el-table-column>
+            <el-table-column prop="phone" label="手机号" min-width="110"></el-table-column>
+            <!--<el-table-column prop="product" label="订购产品" min-width="160"></el-table-column>-->
+            <el-table-column prop="address" label="收货地址" min-width="200"></el-table-column>
             <el-table-column prop="mobileOS" label="系统" width="80">
                 <!--:filters="[{ text: 'iOS', value: 'iOS' }, { text: 'Android', value: 'Android' }]"-->
                 <!--:filter-method="filterTag"-->
@@ -39,14 +39,16 @@
                 </template>
             </el-table-column>
             <!--<el-table-column prop="originUrl" label="来源" min-width="120"></el-table-column>-->
-            <el-table-column prop="ctime" label="提交时间" width="120" :formatter="formatDateTime"
+            <el-table-column prop="ctime" label="提交时间" min-width="140" :formatter="formatDateTime"
                              sortable></el-table-column>
-            <el-table-column prop="remarks" label="留言" min-width="180"></el-table-column>
-            <el-table-column prop="ip" label="IP" min-width="140"></el-table-column>
-            <el-table-column label="操作" width="140">
+            <el-table-column prop="remarks" label="留言" min-width="160"></el-table-column>
+            <el-table-column prop="ip" label="IP" min-width="100"></el-table-column>
+            <el-table-column label="操作" v-bind:min-width="operateWidth">
                 <template scope="scope">
                     <el-button size="small" @click="handleEdit(scope.$index, scope.row)">查看</el-button>
-                    <el-button type="danger" size="small" @click="doDelete(scope.$index, scope.row)">删除</el-button>
+                    <el-button type="danger" size="small" @click="doDelete(scope.$index, scope.row)"
+                               v-if="!isTrashMenu">删除
+                    </el-button>
                 </template>
             </el-table-column>
             <el-table-column type="expand">
@@ -59,7 +61,7 @@
             </el-table-column>
         </el-table>
         <!--工具条-->
-        <el-col :span="24" class="toolbar">
+        <el-col :span="24" class="toolbar table-footer">
             <el-button type="danger" @click="doBatchDelete" :disabled="this.selected.length===0">批量删除</el-button>
             <el-pagination layout="total, prev, pager, next" @current-change="handleCurrentChange" :page-size="page.ps"
                            :total="page.total" style="float:right;">
@@ -68,8 +70,8 @@
         <!--编辑界面-->
         <el-dialog title="订单明细" v-model="editFormVisible" :close-on-click-modal="false">
             <el-form :model="editForm" label-width="80px" ref="editForm">
-                <el-form-item label="单号" prop="orderNo">
-                    <el-input v-model="editForm.orderNo" disabled></el-input>
+                <el-form-item label="单号" prop="eid">
+                    <el-input v-model="editForm.eid" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="客户名" prop="customer">
                     <el-input v-model="editForm.customer" disabled></el-input>
@@ -162,7 +164,7 @@
         },
         loading: false,
         selected: [],//列表选中列
-        orderSwitch: '',
+        orderSwitch: 'today',
 
         //编辑界面是否显示
         editFormVisible: false,
@@ -179,9 +181,41 @@
         //addForm: {name: '',sex: -1,age: 0,birth: '',addr: ''}
       }
     },
+    watch: {
+      '$route' (to, from) {
+        this.resetFilterInput();
+        this.getPageList();
+      }
+    },
+    computed: {
+      isTrashMenu: function () {
+        return this.orderSwitch == 'trash';
+      },
+      operateWidth: function () {
+        return this.isTrashMenu ? 60 : 120;
+      }
+    },
     methods: {
       formatDateTime: function (row, column) {
         return DateUtils.formatDateTime(row.ctime);
+      },
+      resetFilterInput(){
+        this.orderSwitch = location.hash.split('/').pop();
+        switch (this.orderSwitch) {
+          case 'today' :
+            this.filters.range = [Date.now(), Date.now()];
+            break;
+          case 'yesterday':
+            this.filters.range = [Date.now() - 3600 * 1000 * 24, Date.now()];
+            break;
+          case 'all':
+            this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
+            break;
+          case 'trash':
+            this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
+            break;
+        }
+        this.filters.name = '';
       },
       handleCurrentChange(val) {
         this.page.pn = val;
@@ -192,6 +226,7 @@
       },
       //获取用户列表
       getPageList() {
+        console.log(`OrderSwitch >> ${this.orderSwitch} | IsTrashMenu >> ${this.isTrashMenu} | OperationWidth >> ${this.operateWidth}`);
         this.loading = true;
         NProgress.start();
         let rangeArr = this.filters.range;
@@ -258,21 +293,7 @@
       }
     },
     mounted() {
-      this.orderSwitch = location.hash.split('/').pop();
-      switch (this.orderSwitch) {
-        case 'today' :
-          this.filters.range = [Date.now(), Date.now()];
-          break;
-        case 'yesterday':
-          this.filters.range = [Date.now() - 3600 * 1000 * 24, Date.now()];
-          break;
-        case 'all':
-          this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
-          break;
-        case 'trash':
-          this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
-          break;
-      }
+      this.resetFilterInput();
       this.getPageList();
     }
   }
@@ -287,8 +308,6 @@
                 letter-spacing: 28px;
             }
         }
-        box-shadow: 0 0 8px 0px #d0f5d0 inset;
-        margin: 0 -19px 0 -50px;
-        padding: 10px 20px;
+        padding: 10px 0px;
     }
 </style>
