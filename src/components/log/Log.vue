@@ -64,7 +64,7 @@
         let params = {
           pn: this.page.pn,
           ps: this.page.ps,
-          username: this.username
+          username: this.filters.username
         };
         this.loading = true;
         NProgress.start();

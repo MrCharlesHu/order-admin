@@ -206,7 +206,8 @@
             this.filters.range = [Date.now(), Date.now()];
             break;
           case 'yesterday':
-            this.filters.range = [Date.now() - 3600 * 1000 * 24, Date.now()];
+            let yesterdayMillis = Date.now() - 3600 * 1000 * 24;
+            this.filters.range = [yesterdayMillis, yesterdayMillis];
             break;
           case 'all':
             this.filters.range = [Date.now() - 3600 * 1000 * 24 * 90, Date.now()];
