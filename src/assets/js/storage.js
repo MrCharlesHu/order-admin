@@ -24,6 +24,11 @@ export default {
     return userInfo && JSON.parse(userInfo);
   },
 
+  getLoginUsername(){
+    var loginInfo = this.getLoginInfo();
+    return loginInfo && loginInfo.username;
+  },
+
   clearLoginInfo(){
     sessionStorage.removeItem(USER_LOGIN_KEY);
     localStorage.removeItem(UNIQUE_ID);

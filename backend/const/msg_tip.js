@@ -18,6 +18,8 @@ module.exports = {
 
   ACCOUNT_EXIST: '账号名已存在',
 
+  DEFAULT_ADMIN: '默认管理员不可被删除',
+
   PARAMS_ERROR: '参数错误',
 
   QUERY_ERROR: '查询错误',

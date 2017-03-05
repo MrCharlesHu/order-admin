@@ -53,11 +53,12 @@
         <el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
             <el-form :model="editFormData" label-width="120px" :rules="editFormRules" ref="editFormData">
                 <el-form-item label="用户名称" prop="editUsername">
-                    <el-input type="text" v-model="editFormData.editUsername" auto-complete="off" placeholder="用户名称"/>
+                    <el-input type="text" v-model="editFormData.editUsername" auto-complete="off"
+                              :disabled="editAdminUsername" placeholder="用户名称"/>
                 </el-form-item>
                 <el-form-item label="用户密码" prop="editPassword">
                     <el-input type="password" v-model="editFormData.editPassword" auto-complete="off"
-                              placeholder="用户密码"/>
+                              :disabled="editAdminPassword" placeholder="用户密码"/>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -72,6 +73,7 @@
   import {DEFAULT_PAGE_SIZE} from 'assets/js/constants'
   import NProgress from 'nprogress'
   import MD5 from 'md5'
+  import Storage from 'assets/js/storage'
   import {getUserPage, deleteUser, deleteUsers, addUser, editUser} from 'api/api'
 
   export default {
@@ -118,9 +120,26 @@
         //编辑界面数据
         editFormData: {
           eid: 0,
-          username: '',
-          password: ''
+          editUsername: '',
+          editPassword: ''
         }
+      }
+    },
+    computed: {
+      isAdminLogin: function () {
+        return Storage.getLoginUsername() == 'admin';
+      },
+      isSelfEdit: function () {
+        // 是否是在编辑自己的信息
+        return this.editFormData.editUsername == Storage.getLoginUsername();
+      },
+      editAdminUsername: function () {
+        // 编辑框中的用户名为admin或者不是自己登录的用户
+        return !(this.isSelfEdit || this.isAdminLogin) || this.editFormData.editUsername == 'admin';
+      },
+      editAdminPassword: function () {
+        // 不是admin登录的人只能修改自己的密码
+        return !(this.isSelfEdit || this.isAdminLogin);
       }
     },
     methods: {
@@ -192,7 +211,6 @@
                 username: this.editFormData.editUsername,
                 password: MD5(this.editFormData.editPassword)
               };
-              console.log(params);
               editUser(params).then(({err, data, msg}) => {
                 this.editLoading = false;
                 NProgress.done();

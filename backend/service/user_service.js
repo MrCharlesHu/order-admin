@@ -46,7 +46,12 @@ class UserService extends BaseService {
   *deleteOne(userId) {
     var pv_err = PV().num('UserId', userId).validate();
     if (pv_err) throw pv_err;
-    return yield* super.deleteEntityById(userId);
+    var userInfo = yield* super.findOneById(userId);
+    if (userInfo.username == 'admin') {
+      throw new Error(MsgTip.DEFAULT_ADMIN);
+    } else {
+      return yield* super.deleteEntityById(userId);
+    }
   }
 
   *deleteBatch(userIds) {

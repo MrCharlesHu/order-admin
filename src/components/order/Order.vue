@@ -227,7 +227,6 @@
       },
       //获取用户列表
       getPageList() {
-        console.log(`OrderSwitch >> ${this.orderSwitch} | IsTrashMenu >> ${this.isTrashMenu} | OperationWidth >> ${this.operateWidth}`);
         this.loading = true;
         NProgress.start();
         let rangeArr = this.filters.range;
