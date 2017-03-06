@@ -6,6 +6,7 @@ const splitToParseInt = require('../utils/objects').splitToParseInt;
 const {ACTIVE, DELETED} = require('../const/active_type');
 const PageRequest = require('../utils/pageable').PageRequest;
 const Filters = require('../utils/filters').Filters;
+const Order = require('../bean/order');
 
 function orderFilter(req, deleted) {
   var filters = new Filters();
@@ -17,6 +18,16 @@ function orderFilter(req, deleted) {
   }
   return filters;
 }
+
+router.post("/save", function (req, res) {
+  var order = new Order(req.body);
+  console.log(order);
+  var cop = co(function*() {
+    yield* orderService.saveEntity(order);
+    return {};
+  });
+  Ctx(res, cop).coSuccess();
+});
 
 router.get("/page", function (req, res) {
   var pr = PageRequest.buildFromRequest(req);
