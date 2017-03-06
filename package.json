@@ -1,17 +1,19 @@
 {
   "name": "order-admin",
   "version": "1.0.0",
-  "description": "order admin project",
+  "description": "Order Admin Project",
   "author": "Charles",
   "license": "MIT",
   "scripts": {
     "dev": "node build/dev-server.js",
+    "prod": "node build/prod-server.js",
     "build": "node build/build.js"
   },
   "dependencies": {
     "axios": "^0.15.3",
     "body-parser": "^1.16.1",
     "co": "^4.6.0",
+    "compression": "^1.6.2",
     "connect-redis": "^3.2.0",
     "cookie-parser": "^1.4.3",
     "crypto": "0.0.3",
@@ -19,6 +21,7 @@
     "express": "^4.15.0",
     "express-session": "^1.15.1",
     "express-urlrewrite": "^1.2.0",
+    "express-xml-bodyparser": "^0.3.0",
     "fs-extra": "^2.0.0",
     "knex": "^0.12.7",
     "lodash": "^4.17.4",
