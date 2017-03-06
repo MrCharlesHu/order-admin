@@ -10,7 +10,10 @@ var env = config.build.env
 
 var webpackConfig = merge(baseWebpackConfig, {
   module: {
-    loaders: utils.styleLoaders({ sourceMap: config.build.productionSourceMap, extract: true })
+    loaders: utils.styleLoaders({
+      sourceMap: config.build.productionSourceMap,
+      extract: true
+    })
   },
   devtool: config.build.productionSourceMap ? '#source-map' : false,
   output: {
@@ -62,9 +65,7 @@ var webpackConfig = merge(baseWebpackConfig, {
         return (
           module.resource &&
           /\.js$/.test(module.resource) &&
-          module.resource.indexOf(
-            path.join(__dirname, '../node_modules')
-          ) === 0
+          module.resource.indexOf(path.join(__dirname, '../node_modules')) === 0
         )
       }
     }),
@@ -84,11 +85,7 @@ if (config.build.productionGzip) {
     new CompressionWebpackPlugin({
       asset: '[path].gz[query]',
       algorithm: 'gzip',
-      test: new RegExp(
-        '\\.(' +
-        config.build.productionGzipExtensions.join('|') +
-        ')$'
-      ),
+      test: new RegExp('\\.(' + config.build.productionGzipExtensions.join('|') + ')$'),
       threshold: 10240,
       minRatio: 0.8
     })
