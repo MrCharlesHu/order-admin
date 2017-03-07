@@ -1,9 +1,6 @@
 const app_start_ms = Date.now()
 require('./check-versions')()
-const Config = require('../config')
-if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = Config.dev.env
-}
+const config = require('../config')
 var express = require('express')
 var http = require('http')
 var path = require('path')
@@ -28,19 +25,18 @@ app.use('/api/order', require('../backend/router/order'))
 app.use('/api/log', require('../backend/router/log'))
 
 // serve pure static assets
-// const staticPath = path.posix.join(Config.dev.assetsPublicPath, Config.dev.assetsSubDirectory)
+// const staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 // app.use(staticPath, express.static('./static'))
 app.use(express.static(path.resolve(__dirname, '../dist')))
 
 app.use(function (req, res, next) {
-  console.log('Request SessionID [' + req.sessionID + ']');
-  console.log('Request Path [' + req.path + ']');
-  var err = new Error('Not Found')
-  err.status = 404
-  next(err)
+  // var err = new Error('Not Found')
+  // err.status = 404
+  console.error(`Request Not Found [${req.path}]`);
+  next()
 })
 
-var port = normalizePort(process.env.PORT || Config.dev.port)
+var port = normalizePort(process.env.PORT || config.dev.port)
 app.set('port', port)
 var server = http.createServer(app)
 server.listen(port)

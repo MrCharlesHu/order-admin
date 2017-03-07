@@ -21,12 +21,13 @@ function orderFilter(req, deleted) {
 
 router.post("/save", function (req, res) {
   var order = new Order(req.body);
+  order.setOtherProps(req);
   console.log(order);
-  var cop = co(function*() {
-    yield* orderService.saveEntity(order);
-    return {};
-  });
-  Ctx(res, cop).coSuccess();
+  co(function*() {
+    return yield* orderService.saveEntity(order);
+  }).then(data => {
+    res.send('订购成功，请静等收货吧！');
+  }).catch(err => this.error(err));
 });
 
 router.get("/page", function (req, res) {

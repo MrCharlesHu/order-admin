@@ -16,7 +16,8 @@ const TableInfo = {
    */
   ORDER: {
     name: 'order',
-    fields: COMMON_PROPS.concat(['customer', 'phone', 'product', 'address', 'mobile_os', 'origin_url', 'ip', 'remarks'])
+    fields: COMMON_PROPS.concat(['customer', 'phone', 'product', 'address', 'payment',
+      'mobile_os', 'origin_url', 'ip', 'remarks'])
   },
   /**
    * 管理员操作日志
