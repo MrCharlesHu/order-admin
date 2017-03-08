@@ -19,7 +19,7 @@ class Order extends CommonBean {
 
   setOtherProps(req) {
     var userAgent = ReqUtils.userAgent(req);
-    if (userAgent.indexOf('iOS') > -1) {
+    if (userAgent.indexOf('iPhone') > -1) {
       this.mobileOS = 'iOS';
     } else if (userAgent.indexOf('Android') > -1) {
       this.mobileOS = 'Android';

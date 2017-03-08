@@ -8,9 +8,9 @@
                                     :picker-options="pickerOptions">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="渠道">
-                    <el-input v-model="filters.name" placeholder="渠道"/>
-                </el-form-item>
+                <!--<el-form-item label="渠道">-->
+                <!--<el-input v-model="filters.name" placeholder="渠道"/>-->
+                <!--</el-form-item>-->
                 <el-form-item>
                     <el-button type="primary" v-on:click="getPageList">查询</el-button>
                 </el-form-item>
@@ -252,8 +252,8 @@
       },
       //显示新增界面
       exportExcel: function () {
-        this.addFormVisible = true;
-        this.addForm = {name: '', sex: -1, age: 0, birth: '', addr: ''};
+        var url = ['http://', location.host, '/api/order/export'].join('');
+        location.href = url;
       },
       selectedChange: function (selected) {
         this.selected = selected;

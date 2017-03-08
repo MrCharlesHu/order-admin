@@ -3,6 +3,7 @@ var BaseService = require('./base_service');
 var PV = require('../utils/validation');
 var Order = require('../bean/order');
 const Sort = require('../utils/pageable').Sort;
+const {isArrayEmpty, formatMillis}  = require('../utils/objects');
 
 class OrderService extends BaseService {
 
@@ -29,6 +30,20 @@ class OrderService extends BaseService {
     var pv_err = PV().arr('OrderIds', orderIds).validate();
     if (pv_err) throw pv_err;
     return yield* super.deleteEntitiesByIds(orderIds);
+  }
+
+  *findExportDataList(filters) {
+    // var pv_err = PV().obj('Filters', filters).validate();
+    // if (pv_err) throw pv_err;
+    var orders = yield* super.findListByFilter(filters);
+    var resultArr = [['订单号', '客户名', '手机号码', '订购产品', '收货地址', '系统', '来源', '提交时间', '留言', 'IP']];
+    if (!isArrayEmpty(orders)) {
+      for (let order of orders) {
+        resultArr.push([order.eid, order.customer, order.phone, order.product, order.address,
+          order.mobileOS, order.originUrl, formatMillis(order.ctime), order.remarks, order.ip]);
+      }
+    }
+    return resultArr;
   }
 
   transformOne(entity) {

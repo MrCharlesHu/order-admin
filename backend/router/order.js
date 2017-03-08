@@ -1,5 +1,9 @@
 var router = require('express').Router();
 var co = require('co');
+var fs = require('fs');
+var fse = require('fs-extra')
+var path = require('path');
+var xlsx = require('node-xlsx');
 var Ctx = require('../contexts').CoCtx;
 var orderService = require('../service/order_service');
 const splitToParseInt = require('../utils/objects').splitToParseInt;
@@ -27,7 +31,9 @@ router.post("/save", function (req, res) {
     return yield* orderService.saveEntity(order);
   }).then(data => {
     res.send('订购成功，请静等收货吧！');
-  }).catch(err => this.error(err));
+  }).catch(err => {
+    Ctx(res).error(err);
+  });
 });
 
 router.get("/page", function (req, res) {
@@ -62,6 +68,27 @@ router.get("/delbat/:orderIds", function (req, res) {
     return yield* orderService.deleteBatch(splitToParseInt(orderIds, ','));
   });
   Ctx(res, cop).coSuccess();
+});
+
+router.get("/export", function (req, res) {
+  // var filters = orderFilter(req, ACTIVE);
+  const now = new Date();
+  const sheetName = [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('-') + '之前全部';
+  const fileName = sheetName + '.xlsx';
+  const fileDir = path.resolve(__dirname, '../../temp');
+  const filePath = fileDir + '/' + fileName;
+  co(function*() {
+    var exportData = yield* orderService.findExportDataList(new Filters());
+    var buffer = xlsx.build([{name: sheetName, data: exportData}]);
+    fse.emptyDirSync(fileDir);
+    fs.writeFileSync(filePath, buffer, 'binary');
+    return buffer;
+  }).then(buffer => {
+    // res.send(buffer);
+    res.download(filePath);
+  }).catch(err => {
+    Ctx(res).error(err);
+  });
 });
 
 module.exports = router;
