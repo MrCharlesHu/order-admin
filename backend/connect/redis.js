@@ -2,7 +2,7 @@ var logger = require('../utils/logger').getLogger('redis');
 var redis = require("redis");
 var PV = require('../utils/validation');
 const Seconds = require('./../const/seconds');
-const {RedisConn, KeyPrefix, Families} = require('./config');
+const {RedisConn, KeyPrefix, Families} = require('./../config');
 // const ERR_MSG_PREFIX = 'Wrong arguments when call connect method ';//参数错误提示
 
 //########################################## Redis获取key ###############################################

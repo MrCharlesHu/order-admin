@@ -2,7 +2,7 @@ var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
 // const Seconds = require('../const/seconds');
 var RedisConn = require('./../config').RedisConn;
-const RedisConf = require('./config');
+const RedisConf = require('./../config');
 
 function initSession(app) {
   var options = {

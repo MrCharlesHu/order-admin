@@ -2,7 +2,7 @@ var log4js = require('log4js');
 var fs = require('fs-extra');
 var path = require('path');
 const PATTERN = '-yyyyMMdd';
-const LoggerDir = __dirname + './../logs';
+const LoggerDir = require('../config').LoggerDir;
 const LogLayout = {
   type: 'pattern',
   pattern: '%[%d{ISO8601} (%x{pid}) %p %c -%] %m',
@@ -16,7 +16,7 @@ const Config = {
   replaceConsole: true,
   appenders: [{
     type: 'dateFile',
-    filename: path.join(LoggerDir, 'dac.log'),
+    filename: path.join(LoggerDir, 'access.log'),
     pattern: PATTERN,
     alwaysIncludePattern: true,
     layout: LogLayout

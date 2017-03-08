@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var logger = require('./utils/logger').getLogger('contexts');
 var redisLoginKey = require('./connect/redis').loginKey;
-var {CookiesKey, CookiesConf} = require('./connect/config');
+var {CookiesKey, CookiesConf} = require('./config');
 var Page = require('./utils/pageable').Page;
 const isError = require('./utils/objects').isError;
 const ErrorCode = require('./const/error_code');

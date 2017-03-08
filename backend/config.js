@@ -1,3 +1,5 @@
+var path = require('path');
+var fs = require('fs-extra');
 /**
  * MySQL连接配置
  * @type {{host: string, user: string, password: string, database: string}}
@@ -47,16 +49,28 @@ const CookiesKey = {
  * Cookie设置的选项
  * @type {{path: string, httpOnly: boolean, secure: boolean}}
  */
-var CookiesConf = {
+const CookiesConf = {
   path: '/',
   // expires: 0,
   httpOnly: true,
   secure: false
   // maxAge: null
 };
+/**
+ * 日志目录
+ */
+const LoggerDir = path.resolve(__dirname, './../logs');
+const TempDir = path.resolve(__dirname, './../temp');
+
 exports.MySQLConn = MySQLConn;
 exports.RedisConn = RedisConn;
 exports.KeyPrefix = KeyPrefix;
 exports.Families = Families;
 exports.CookiesKey = CookiesKey;
 exports.CookiesConf = CookiesConf;
+exports.LoggerDir = LoggerDir;
+
+(() => {
+  fs.ensureDirSync(LoggerDir);
+  fs.ensureDirSync(TempDir);
+})();

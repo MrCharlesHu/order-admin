@@ -1,4 +1,4 @@
-const MySQLConn = require('./config').MySQLConn;
+const MySQLConn = require('./../config').MySQLConn;
 
 /**
  * The client created by the configuration initializes a connection pool, using the Pool2 library.

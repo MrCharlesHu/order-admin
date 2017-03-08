@@ -33,7 +33,7 @@ router.post("/login", function (req, res) {
     if (isUserInfoValid(userInfo)) {
       yield* logService.saveLoginLog(userInfo.eid, userInfo.username, '登录', ip(req), userAgent(req));
       yield* RedisUtils.cacheUserLoginInfo(uniqueId, userInfo);
-      // req.session.userInfo = userInfo;
+      req.session.userInfo = userInfo;
       return [uniqueId, userInfo];
     } else {
       throw new Error(MsgTip.LOGIN_INFO_WRONG);

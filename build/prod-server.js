@@ -20,9 +20,12 @@ app.use(cookieParser())
 app.use(xmlparser())
 app.enable('trust proxy')
 
+require('../backend/connect/session')(app)
+require('../backend/utils/logger').init(app)
 app.use('/api/user', require('../backend/router/user'))
 app.use('/api/order', require('../backend/router/order'))
 app.use('/api/log', require('../backend/router/log'))
+app.use('/api/common', require('../backend/router/common'))
 
 // serve pure static assets
 // const staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)

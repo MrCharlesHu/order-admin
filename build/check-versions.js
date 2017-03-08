@@ -2,22 +2,18 @@ var semver = require('semver')
 var chalk = require('chalk')
 var packageConfig = require('../package.json')
 var exec = function (cmd) {
-  return require('child_process')
-    .execSync(cmd).toString().trim()
+  return require('child_process').execSync(cmd).toString().trim()
 }
 
-var versionRequirements = [
-  {
-    name: 'node',
-    currentVersion: semver.clean(process.version),
-    versionRequirement: packageConfig.engines.node
-  },
-  {
-    name: 'npm',
-    currentVersion: exec('npm --version'),
-    versionRequirement: packageConfig.engines.npm
-  }
-]
+var versionRequirements = [{
+  name: 'node',
+  currentVersion: semver.clean(process.version),
+  versionRequirement: packageConfig.engines.node
+}, {
+  name: 'npm',
+  currentVersion: exec('npm --version'),
+  versionRequirement: packageConfig.engines.npm
+}]
 
 module.exports = function () {
   var warnings = []
